@@ -7,6 +7,8 @@ public class CameraBehavior : MonoBehaviour
         get { return sensitivity; }
         set { sensitivity = value; }
     }
+
+    public int fov;
     
     [Range(0.1f, 9f)][SerializeField] float sensitivity = 2f;
     [Tooltip("Limits vertical camera rotation. Prevents the flipping that happens when rotation goes above 90.")]
@@ -23,9 +25,11 @@ public class CameraBehavior : MonoBehaviour
     void Start()
     {
         Cursor.visible = false;
+        Camera.FieldOfViewToFocalLength(fov,1);
     }
 
     void Update(){
+        Camera.FieldOfViewToFocalLength(fov,1);
         rotation.x += Input.GetAxis(xAxis) * sensitivity;
         rotation.y += Input.GetAxis(yAxis) * sensitivity;
         rotation.y = Mathf.Clamp(rotation.y, -yRotationLimit, yRotationLimit);

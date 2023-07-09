@@ -2,118 +2,166 @@ using UnityEngine;
 
 public class PlayerMovementController : MonoBehaviour
 {
-    [Header("Movement")]
-    public float moveSpeed;
+    
+    //keybindings 
+    
+    //movement
+    public KeyCode forwards;
+    public KeyCode backwards;
+    public KeyCode strafeLef;
+    public KeyCode strafeRight;
+    public KeyCode jump;
 
-    public float groundDrag;
+    //advanced movement
+    public KeyCode sprint;
+    public KeyCode tacticalSprint;
+    public KeyCode crouch;
+    public KeyCode lie;
+    
+    //Combat
+    public KeyCode shoot;
+    public KeyCode ads;
+    public KeyCode reload;
+    public KeyCode changeMag;
+    public KeyCode meele;
+    public KeyCode switchToMeele;
+    public KeyCode switchToSecondary;
+    public KeyCode switchToPrimary;
+    public KeyCode granadeOne;
+    public KeyCode granadeTwo;
+    
+    
+    //abbilities general
+    public KeyCode gadgetOne;
+    public KeyCode gadgetTwo;
+    public KeyCode gadgetThree;
+    
+    //Attacker Abilities
+    
+    //Defender Abilities
+    
+    //interactions
+    public KeyCode use;
+    public KeyCode emote;
+    
+    
+   
+    //Variables
+    
+    
+    private bool doubleJumpUsed;
+    
+    
+    public float mouseSensitivityX = 1.0f;
+    public float mouseSensitivityY = 1.0f;
 
-    public float jumpForce;
-    public float jumpCooldown;
-    public float airMultiplier;
-    bool _readyToJump;
-
-    public float walkSpeed;
-    public float sprintSpeed;
-
-    [Header("Keybindings")]
-    public KeyCode jumpKey = KeyCode.Space;
-
-    [Header("Ground Check")]
-    public float playerHeight;
-    public LayerMask whatIsGround;
+    private bool isSprinnting;
+    
+    public float walkSpeed = 3.0f;
+    public float sprintSpeed = 6.0f;
+    public float tacticalSprintSpeed = 8.0f;
+    
+    Vector3 moveAmount;
+    Vector3 smoothMoveVelocity;
+    
+    Transform cameraT;
+    float verticalLookRotation;
+    
+    Rigidbody rigidbodyR;
+    
+    public float jumpForce = 250.0f;
     bool _grounded;
+    public LayerMask groundedMask;
 
-    public Transform orientation;
+    bool cursorVisible;
 
-    float _horizontalInput;
-    float _verticalInput;
-
-    Vector3 _moveDirection;
-
-    Rigidbody _rb;
-
-    private void Start()
-    {
-        MyInput();
-        _rb = GetComponent<Rigidbody>();
-        _rb.freezeRotation = true;
-
-        _readyToJump = true;
+    // Use this for initialization
+    void Start () {
+        cameraT = Camera.main.transform;
+        rigidbodyR = GetComponent<Rigidbody> ();
+        LockMouse ();
     }
+	
+    // Update is called once per frame
+    void Update () {
+        // rotation
+        transform.Rotate (Vector3.up * (Input.GetAxis ("Mouse X") * mouseSensitivityX));
+        verticalLookRotation += Input.GetAxis ("Mouse Y") * mouseSensitivityY;
+        verticalLookRotation = Mathf.Clamp (verticalLookRotation, -60, 60);
+        cameraT.localEulerAngles = Vector3.left * verticalLookRotation;
 
-    private void Update()
+        // movement
+        Vector3 moveDir = new Vector3 (Input.GetAxisRaw ("Horizontal"), 0, Input.GetAxisRaw ("Vertical")).normalized;
+        Vector3 targetMoveAmount = moveDir * walkSpeed;
+        moveAmount = Vector3.SmoothDamp (moveAmount, targetMoveAmount, ref smoothMoveVelocity, .15f);
+
+        // sprint
+        /*
+        while(Input.GetKeyDown("sprint"){
+            walkSpeed = sprintSpeed;
+        }
+        */
+        // jump & double Jump
+        if (Input.GetButtonDown ("Jump")) {
+            if (_grounded) {
+                rigidbodyR.AddForce (transform.up * jumpForce);
+            }
+        }
+
+        Ray ray = new Ray (transform.position, -transform.up);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, 1 + .1f, groundedMask)) {
+            _grounded = true;
+        }
+        else {
+            _grounded = false;
+        }
+
+        /* Lock/unlock mouse on click */
+        if (Input.GetMouseButtonUp (0)) {
+            if (!cursorVisible) {
+                UnlockMouse ();
+            } else {
+                LockMouse ();
+            }
+        }
+    }
+    
+    //crouch and slide
+
+    /*
+    void crouch()
     {
-        // ground check
-        _grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.3f, whatIsGround);
-
-        SpeedControl();
-
-        // handle drag
-        if (_grounded)
-            _rb.drag = groundDrag;
+        if (isSprinnting)
+        {
+            Slide();
+        }
         else
-            _rb.drag = 0;
-    }
-
-    private void FixedUpdate()
-    {
-        MovePlayer();
-    }
-
-    private void MyInput()
-    {
-        _horizontalInput = Input.GetAxisRaw("Horizontal");
-        _verticalInput = Input.GetAxisRaw("Vertical");
-
-        // when to jump
-        if(Input.GetKey(jumpKey) && _readyToJump && _grounded)
         {
-            _readyToJump = false;
-
-            Jump();
-
-            Invoke(nameof(ResetJump), jumpCooldown);
+            //code for crouching
         }
     }
+    */
 
-    private void MovePlayer()
-    {
-        // calculate movement direction
-        _moveDirection = orientation.forward * _verticalInput + orientation.right * _horizontalInput;
-
-        // on ground
-        if(_grounded)
-            _rb.AddForce(_moveDirection.normalized * (moveSpeed * 10f), ForceMode.Force);
-
-        // in air
-        else if(!_grounded)
-            _rb.AddForce(_moveDirection.normalized * (moveSpeed * 10f * airMultiplier), ForceMode.Force);
+    void FixedUpdate() {
+        rigidbodyR.MovePosition (rigidbodyR.position + transform.TransformDirection (moveAmount) * Time.fixedDeltaTime);
     }
 
-    private void SpeedControl()
-    {
-        var velocity = _rb.velocity;
-        Vector3 flatVel = new Vector3(velocity.x, 0f, velocity.z);
-
-        // limit velocity if needed
-        if(flatVel.magnitude > moveSpeed)
-        {
-            Vector3 limitedVel = flatVel.normalized * moveSpeed;
-            _rb.velocity = new Vector3(limitedVel.x, _rb.velocity.y, limitedVel.z);
-        }
+    void UnlockMouse() {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        cursorVisible = true;
     }
 
-    private void Jump()
-    {
-        // reset y velocity
-        var velocity = _rb.velocity;
-        velocity = new Vector3(velocity.x, 0f, velocity.z);
-        _rb.velocity = velocity;
-
-        _rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+    void LockMouse() {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        cursorVisible = false;
     }
-    private void ResetJump()
+
+    void Slide()
     {
-        _readyToJump = true;
+        
     }
 }
