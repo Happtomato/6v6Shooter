@@ -640,6 +640,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cad4a83a60178d7498df6501f19b9eb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fov: 0
   sensitivity: 1.2
   yRotationLimit: 88
 --- !u!1 &1546219330
@@ -688,7 +689,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 80
   m_CollisionDetection: 0
 --- !u!114 &1546219332
 MonoBehaviour:
@@ -702,19 +703,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e947267f411f7ba43826b7039fe9c7ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 3
-  groundDrag: 1
-  jumpForce: 1
-  jumpCooldown: 1
-  airMultiplier: 1
+  forwards: 119
+  backwards: 115
+  strafeLeft: 97
+  strafeRight: 100
+  jump: 32
+  sprint: 304
+  tacticalSprint: 0
+  crouch: 306
+  lie: 308
+  shoot: 0
+  ads: 1
+  reload: 114
+  changeMag: 0
+  switchToMeele: 118
+  switchToSecondary: 0
+  switchToPrimary: 0
+  granadeOne: 0
+  granadeTwo: 0
+  gadgetOne: 0
+  gadgetTwo: 0
+  gadgetThree: 0
+  use: 0
+  emote: 0
   walkSpeed: 0
   sprintSpeed: 0
-  jumpKey: 32
-  playerHeight: 3
-  whatIsGround:
+  tacticalSprintSpeed: 8
+  jetpackFuel: 100
+  jumpForce: 1
+  groundedMask:
     serializedVersion: 2
-    m_Bits: 8
-  orientation: {fileID: 963194228}
+    m_Bits: 0
+  mouseSensitivityX: 1
+  mouseSensitivityY: 1
 --- !u!136 &1546219333
 CapsuleCollider:
   m_ObjectHideFlags: 0

@@ -26,8 +26,7 @@ public class PlayerMovementController : MonoBehaviour
     public MouseButton ads = MouseButton.RightMouse;
     public KeyCode reload = KeyCode.R;
     public KeyCode changeMag;
-    public KeyCode meele = KeyCode.V;
-    public KeyCode switchToMeele = ;
+    public KeyCode switchToMeele = KeyCode.V;
     public KeyCode switchToSecondary;
     public KeyCode switchToPrimary;
     public KeyCode granadeOne;
@@ -109,8 +108,16 @@ public class PlayerMovementController : MonoBehaviour
         
         // sprint
         
-        while(sprint){
+        //Sprinting
+		
+        if (Input.GetKey(sprint)) {
             walkSpeed = sprintSpeed;
+        }
+        else {
+            walkSpeed = walkSpeed;
+        }
+        if (Input.GetKeyUp(sprint)){
+            walkSpeed = 4f;
         }
         
         
@@ -120,9 +127,10 @@ public class PlayerMovementController : MonoBehaviour
             if (_grounded) {
                 rigidbodyR.AddForce (transform.up * jumpForce);
             }
-            else if (doubleJumpUsed)
+            else if (!doubleJumpUsed)
             {
                 rigidbodyR.AddForce (transform.up * jumpForce);
+                doubleJumpUsed = true;
             }
         }
 
@@ -193,9 +201,24 @@ public class PlayerMovementController : MonoBehaviour
 
     void Move()
     {
-        Vector3 moveDir = new Vector3 (Input.GetAxisRaw ("Horizontal"), 0, Input.GetAxisRaw ("Vertical")).normalized;
-        Vector3 targetMoveAmount = moveDir * walkSpeed;
-        moveAmount = Vector3.SmoothDamp (moveAmount, targetMoveAmount, ref smoothMoveVelocity, .15f);
+        if (Input.GetKey(strafeRight))
+        {
+            transform.position += new Vector3(walkSpeed * Time.deltaTime, 0f, 0f);
+        }
 
+        if (Input.GetKey(strafeLeft))
+        {
+            transform.position -= new Vector3(walkSpeed * Time.deltaTime, 0f, 0f);
+        }
+
+        if (Input.GetKey(forwards))
+        {
+            transform.position += new Vector3(0f, walkSpeed * Time.deltaTime, 0f);
+        }
+
+        if (Input.GetKey(backwards))
+        {
+            transform.position -= new Vector3(0f, walkSpeed * Time.deltaTime, 0f);
+        }
     }
 }
